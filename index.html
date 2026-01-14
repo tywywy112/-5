@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>Flag AI Game</title>
+
+<style>
+body{
+    font-family: Arial;
+    background:#eef2ff;
+    text-align:center;
+    padding:30px;
+}
+.box{
+    background:white;
+    padding:20px;
+    border-radius:15px;
+    max-width:450px;
+    margin:auto;
+}
+.flag{
+    font-size:80px;
+    margin:15px 0;
+}
+button{
+    width:240px;
+    padding:12px;
+    margin:8px;
+    border:none;
+    border-radius:12px;
+    background:#4f46e5;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+}
+button:hover{
+    background:#4338ca;
+}
+.hidden{
+    display:none;
+}
+</style>
+</head>
+
+<body>
+
+<!-- หน้าเมนู -->
+<div class="box" id="menu">
+    <h2>🌍 Flag AI Game</h2>
+    <p>เลือกมินิเกม</p>
+    <button onclick="startMode('country')">🟨 ทายชื่อประเทศ</button><br>
+    <button onclick="startMode('continent')">🟦 ทายทวีป</button>
+</div>
+
+<!-- หน้าเกม -->
+<div class="box hidden" id="game">
+    <h2 id="gameTitle">เกม</h2>
+    <div class="flag" id="flag">🏳️</div>
+    <div id="choices"></div>
+    <p>
+        ⏱ เวลา: <span id="time">15</span> |
+        ⭐ คะแนน: <span id="score">0</span>
+    </p>
+    <button onclick="backToMenu()">⬅ กลับหน้าเมนู</button>
+</div>
+
+<script>
+// ====================
+// ข้อมูล (3 ทวีป)
+// ====================
+const continents = ["Asia","Europe","Africa"];
+
+const countries = [
+    // Asia
+    {name:"Thailand", flag:"🇹🇭", continent:"Asia"},
+    {name:"Japan", flag:"🇯🇵", continent:"Asia"},
+    {name:"China", flag:"🇨🇳", continent:"Asia"},
+    {name:"South Korea", flag:"🇰🇷", continent:"Asia"},
+    {name:"India", flag:"🇮🇳", continent:"Asia"},
+    {name:"Indonesia", flag:"🇮🇩", continent:"Asia"},
+
+    // Europe
+    {name:"France", flag:"🇫🇷", continent:"Europe"},
+    {name:"Germany", flag:"🇩🇪", continent:"Europe"},
+    {name:"Italy", flag:"🇮🇹", continent:"Europe"},
+    {name:"Spain", flag:"🇪🇸", continent:"Europe"},
+    {name:"United Kingdom", flag:"🇬🇧", continent:"Europe"},
+    {name:"Netherlands", flag:"🇳🇱", continent:"Europe"},
+
+    // Africa
+    {name:"Egypt", flag:"🇪🇬", continent:"Africa"},
+    {name:"Nigeria", flag:"🇳🇬", continent:"Africa"},
+    {name:"Kenya", flag:"🇰🇪", continent:"Africa"},
+    {name:"South Africa", flag:"🇿🇦", continent:"Africa"},
+    {name:"Morocco", flag:"🇲🇦", continent:"Africa"}
+];
+
+// ====================
+// ตัวแปร
+// ====================
+let mode = "";
+let score = 0;
+let time = 15;
+let timer;
+let current;
+
+// ====================
+function randomItem(arr){
+    return arr[Math.floor(Math.random()*arr.length)];
+}
+
+// ====================
+// เริ่มโหมดเกม
+// ====================
+function startMode(selectedMode){
+    mode = selectedMode;
+    score = 0;
+
+    document.getElementById("score").innerText = score;
+    document.getElementById("menu").classList.add("hidden");
+    document.getElementById("game").classList.remove("hidden");
+
+    document.getElementById("gameTitle").innerText =
+        mode === "country"
+        ? "🟨 มินิเกม: ทายชื่อประเทศ"
+        : "🟦 มินิเกม: ทายทวีป";
+
+    startRound();
+}
+
+// ====================
+function startRound(){
+    clearInterval(timer);
+    time = 15;
+    document.getElementById("time").innerText = time;
+
+    current = randomItem(countries);
+    document.getElementById("flag").innerText = current.flag;
+
+    createChoices();
+    timer = setInterval(countdown,1000);
+}
+
+// ====================
+function createChoices(){
+    const box = document.getElementById("choices");
+    box.innerHTML = "";
+    let options = [];
+
+    if(mode === "continent"){
+        options = [...continents];
+    }else{
+        options = countries
+            .filter(c => c.continent === current.continent)
+            .map(c => c.name);
+
+        options = options.sort(()=>0.5-Math.random()).slice(0,3);
+        if(!options.includes(current.name)){
+            options[0] = current.name;
+        }
+    }
+
+    options = options.sort(()=>0.5-Math.random());
+
+    options.forEach(opt=>{
+        const btn = document.createElement("button");
+        btn.innerText = opt;
+        btn.onclick = ()=>checkAnswer(opt);
+        box.appendChild(btn);
+    });
+}
+
+// ====================
+function checkAnswer(ans){
+    if(ans === current.name || ans === current.continent){
+        score += 10;
+        document.getElementById("score").innerText = score;
+    }
+    startRound();
+}
+
+// ====================
+function countdown(){
+    time--;
+    document.getElementById("time").innerText = time;
+    if(time <= 0){
+        startRound();
+    }
+}
+
+// ====================
+function backToMenu(){
+    clearInterval(timer);
+    document.getElementById("game").classList.add("hidden");
+    document.getElementById("menu").classList.remove("hidden");
+}
+</script>
+
+</body>
+</html>
